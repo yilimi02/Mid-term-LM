@@ -37,8 +37,6 @@ def parse_iwslt_xml(src_xml, tgt_xml):
     src_texts = get_segments(src_xml)
     tgt_texts = get_segments(tgt_xml)
 
-    print(f"DEBUG: Loaded {len(src_texts)} source sentences, {len(tgt_texts)} target sentences")
-
     if len(src_texts) == 0 or len(tgt_texts) == 0:
         raise ValueError("No data found. Check your XML paths and parsing logic.")
 
