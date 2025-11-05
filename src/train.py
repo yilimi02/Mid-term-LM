@@ -44,7 +44,7 @@ def train_seq2seq(config):
     ).to(device)
 
     # 加载训练好的 checkpoint
-    checkpoint = torch.load('results/seq2seq_epoch10.pt', map_location=device)
+    checkpoint = torch.load('../results/seq2seq_epoch10.pt', map_location=device)
     encoder.load_state_dict(checkpoint['encoder'])
     decoder.load_state_dict(checkpoint['decoder'])
 
@@ -167,7 +167,7 @@ if __name__ == '__main__':
         'epochs': 100,
         'grad_clip': 1.0,
         'warmup_steps': 200,
-        'save_dir': 'results',
+        'save_dir': '../results',
         'max_gen_len': 50
     }
 
