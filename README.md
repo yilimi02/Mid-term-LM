@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 ## Project Structure
 
-- **`README.md`**: Project documentation and overview.
+- **README.md:** Project documentation and overview.
 - **src/:** model.py, data.py, train.py, utils.py
 - **scripts/:** run.sh
 - **results/:** model.pt, train_curves_seq2seq.png
