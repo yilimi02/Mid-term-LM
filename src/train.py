@@ -21,6 +21,7 @@ def train_seq2seq(config):
     print(f"Loaded {len(train_set)} training samples, {len(val_set)} validation samples")
     train_loader = DataLoader(train_set, batch_size=config['batch_size'], shuffle=True)
     val_loader = DataLoader(val_set, batch_size=config['batch_size'], shuffle=False)
+    test_loader = DataLoader(test_set, batch_size=config['batch_size'], shuffle=False)
 
     vocab_size = len(tokenizer.chars)
     encoder = TransformerEncoder(
@@ -44,7 +45,7 @@ def train_seq2seq(config):
     ).to(device)
 
     # # 加载训练好的 checkpoint
-    # checkpoint = torch.load('../results/seq2seq_epoch10.pt', map_location=device)
+    # checkpoint = torch.load('../results/seq2seq_epoch30.pt', map_location=device)
     # encoder.load_state_dict(checkpoint['encoder'])
     # decoder.load_state_dict(checkpoint['decoder'])
 
@@ -134,16 +135,38 @@ def train_seq2seq(config):
     # 生成示例
     encoder.eval()
     decoder.eval()
+    test_loss_total = 0.0
+    test_losses = []
     with torch.no_grad():
-        src, _ = train_set[0]  # 从验证集取样
-        src = src.unsqueeze(0).to(device)
-        memory, _ = encoder(src, mask=create_padding_mask(src))
-        start_token_id = tokenizer.stoi.get('<sos>', 0)  # 或者你训练时使用的开始符
-        ys = decoder.greedy_generate(memory, start_token_id=start_token_id,
-                                     max_len=50,
-                                     eos_token_id=tokenizer.stoi.get('<eos>', None),
-                                     device=device)
-        print('generated:', tokenizer.decode(ys[0].cpu()))
+        # src, _ = val_set[0]  # 从验证集取样
+        # src = src.unsqueeze(0).to(device)
+        # memory, _ = encoder(src, mask=create_padding_mask(src))
+        # start_token_id = tokenizer.stoi.get('<pad>', 0)  # 或者你训练时使用的开始符
+        # ys = decoder.greedy_generate(memory, start_token_id=start_token_id,
+        #                              max_len=50,
+        #                              eos_token_id=tokenizer.stoi.get('<eos>', None),
+        #                              device=device)
+        # print(ys[0])
+        # print('generated:', tokenizer.decode(ys[0].cpu()))
+        for src, tgt in test_loader:
+            src, tgt = src.to(device), tgt.to(device)
+            src_mask = create_padding_mask(src)
+            memory, _ = encoder(src, mask=src_mask)
+
+            tgt_input = tgt[:, :-1]
+            tgt_mask = generate_causal_mask(tgt_input.size(1), device=device)
+            tgt_mask = tgt_mask.unsqueeze(0).expand(src.size(0), -1, -1)
+            memory_mask = create_padding_mask(src)
+
+            logits, _ = decoder(tgt_input, memory, tgt_mask=tgt_mask, memory_mask=memory_mask)
+            loss = criterion(logits.view(-1, logits.size(-1)), tgt[:, 1:].contiguous().view(-1))
+            test_loss_total += loss.item()
+
+        avg_test_loss = test_loss_total / len(test_loader)
+        test_losses.append(avg_test_loss)
+
+        print(f"test_loss: {avg_test_loss:.4f}")
+
 
 
 if __name__ == '__main__':
@@ -164,7 +187,7 @@ if __name__ == '__main__':
         'd_ff': 2048,
         'dropout': 0.1,
         'lr': 3e-4,
-        'epochs': 100,
+        'epochs': 30,
         'grad_clip': 1.0,
         'warmup_steps': 200,
         'save_dir': '../results',

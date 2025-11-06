@@ -206,4 +206,5 @@ class TransformerDecoder(nn.Module):
             ys = torch.cat([ys, next_tokens], dim=1)
             if eos_token_id is not None and (next_tokens.squeeze(1) == eos_token_id).all():
                 break
+        print(ys)
         return ys

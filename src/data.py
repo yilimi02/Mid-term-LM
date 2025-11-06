@@ -13,14 +13,16 @@ class CharTokenizer:
         self.chars = self.special_tokens + chars
         self.stoi = {c: i for i, c in enumerate(self.chars)}
         self.itos = {i: c for i, c in enumerate(self.chars)}
+        print(self.itos)
 
     def encode(self, text):
         return [self.stoi.get(c, self.stoi.get('<unk>', 1)) for c in text]
 
     def decode(self, indices):
+        if isinstance(indices, torch.Tensor):
+            indices = indices.tolist()  # 把 Tensor 转成 Python list
         return ''.join([self.itos.get(i, '<unk>') for i in indices])
 
-import xml.etree.ElementTree as ET
 
 def parse_iwslt_xml(src_xml, tgt_xml):
     def get_segments(xml_file):
