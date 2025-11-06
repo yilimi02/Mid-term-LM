@@ -43,10 +43,10 @@ def train_seq2seq(config):
         dropout=config['dropout']
     ).to(device)
 
-    # 加载训练好的 checkpoint
-    checkpoint = torch.load('../results/seq2seq_epoch10.pt', map_location=device)
-    encoder.load_state_dict(checkpoint['encoder'])
-    decoder.load_state_dict(checkpoint['decoder'])
+    # # 加载训练好的 checkpoint
+    # checkpoint = torch.load('../results/seq2seq_epoch10.pt', map_location=device)
+    # encoder.load_state_dict(checkpoint['encoder'])
+    # decoder.load_state_dict(checkpoint['decoder'])
 
     params = list(encoder.parameters()) + list(decoder.parameters())
     optimizer = AdamW(params, lr=config['lr'], weight_decay=0.01)
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         'src_xml': '../IWSLT17.TED.tst2010.en-de.en.xml',
         'tgt_xml': '../IWSLT17.TED.tst2010.en-de.de.xml',
         'seed': args.seed,
-        'seq_len': 128,
+        'seq_len': 256,
         'batch_size': 32,
         'd_model': 512,
         'n_layers': 6,

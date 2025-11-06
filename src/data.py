@@ -31,6 +31,8 @@ def parse_iwslt_xml(src_xml, tgt_xml):
         for doc in root.findall(".//doc"):
             for seg in doc.findall("seg"):
                 if seg.text and seg.text.strip():
+                    # print(seg.text.strip())
+                    # print("\n")
                     segments.append(seg.text.strip())
         return segments
 
